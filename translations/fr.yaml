@@ -1,0 +1,16 @@
+configuration:
+  log_level:
+    name: Niveau de journalisation
+    description: Verbosité des journaux du serveur.
+  api_port:
+    name: Port de l'API
+    description: >-
+      Port TCP exposé pour l'application Android HomeGlass.
+      Laisser vide pour désactiver l'API hors Ingress.
+  allow_remote_access:
+    name: Autoriser l'accès distant
+    description: >-
+      Autorise l'accès à l'API depuis l'extérieur du réseau local.
+      Les écritures restent réservées aux administrateurs Home Assistant.
+network:
+  8765/tcp: API pour l'application Android HomeGlass

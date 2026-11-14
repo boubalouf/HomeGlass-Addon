@@ -1,0 +1,606 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homeglass.local/schema/layout.v1.json",
+  "title": "HomeGlass layout v1",
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "description": "Action déclenchée par un tap, un appui long ou une carte de scène.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/ActionType"
+        },
+        "service": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z_]+\\.[a-z0-9_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service"
+        },
+        "data": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Data"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "roomId": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Roomid"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "ActionType": {
+      "enum": [
+        "toggle",
+        "more_info",
+        "call_service",
+        "navigate",
+        "none"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "Background": {
+      "additionalProperties": false,
+      "description": "Fond d'écran. ``assetId`` référence ``GET /api/assets/{id}``.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/BackgroundType",
+          "default": "gradient"
+        },
+        "assetId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assetid"
+        },
+        "blurDp": {
+          "default": 0.0,
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Blurdp",
+          "type": "number"
+        },
+        "dim": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Dim",
+          "type": "number"
+        }
+      },
+      "title": "Background",
+      "type": "object"
+    },
+    "BackgroundType": {
+      "enum": [
+        "gradient",
+        "solid",
+        "image"
+      ],
+      "title": "BackgroundType",
+      "type": "string"
+    },
+    "Density": {
+      "enum": [
+        "compact",
+        "standard",
+        "comfortable"
+      ],
+      "title": "Density",
+      "type": "string"
+    },
+    "DisplayMode": {
+      "enum": [
+        "auto",
+        "button",
+        "slider",
+        "value",
+        "graph"
+      ],
+      "title": "DisplayMode",
+      "type": "string"
+    },
+    "Home": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": "Maison",
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "summaryChips": {
+          "items": {
+            "$ref": "#/$defs/SummaryChip"
+          },
+          "title": "Summarychips",
+          "type": "array"
+        },
+        "sections": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "scenes": "#/$defs/SceneSection",
+                "tiles": "#/$defs/TileSection"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TileSection"
+              },
+              {
+                "$ref": "#/$defs/SceneSection"
+              }
+            ]
+          },
+          "title": "Sections",
+          "type": "array"
+        }
+      },
+      "title": "Home",
+      "type": "object"
+    },
+    "Room": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "icon": {
+          "default": "meeting_room",
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Icon",
+          "type": "string"
+        },
+        "areaId": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Areaid"
+        },
+        "sections": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "scenes": "#/$defs/SceneSection",
+                "tiles": "#/$defs/TileSection"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TileSection"
+              },
+              {
+                "$ref": "#/$defs/SceneSection"
+              }
+            ]
+          },
+          "title": "Sections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Room",
+      "type": "object"
+    },
+    "SceneItem": {
+      "additionalProperties": false,
+      "description": "Carte de scène : dégradé à deux couleurs et une ou plusieurs actions.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "icon": {
+          "default": "auto_awesome",
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Icon",
+          "type": "string"
+        },
+        "gradient": {
+          "items": {
+            "pattern": "^#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Gradient",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "SceneItem",
+      "type": "object"
+    },
+    "SceneSection": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "scenes",
+          "default": "scenes",
+          "title": "Kind",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/SceneItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "SceneSection",
+      "type": "object"
+    },
+    "SummaryChip": {
+      "enum": [
+        "lights",
+        "climate",
+        "security",
+        "media",
+        "energy"
+      ],
+      "title": "SummaryChip",
+      "type": "string"
+    },
+    "Tab": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TabType"
+        },
+        "label": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "icon": {
+          "default": "apps",
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Icon",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "label"
+      ],
+      "title": "Tab",
+      "type": "object"
+    },
+    "TabType": {
+      "enum": [
+        "home",
+        "rooms",
+        "automations",
+        "settings"
+      ],
+      "title": "TabType",
+      "type": "string"
+    },
+    "Theme": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/ThemeMode",
+          "default": "auto"
+        },
+        "accent": {
+          "default": "#FF9500",
+          "pattern": "^#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "tileRadiusDp": {
+          "default": 22,
+          "maximum": 60,
+          "minimum": 0,
+          "title": "Tileradiusdp",
+          "type": "integer"
+        },
+        "density": {
+          "$ref": "#/$defs/Density",
+          "default": "standard"
+        },
+        "background": {
+          "$ref": "#/$defs/Background"
+        }
+      },
+      "title": "Theme",
+      "type": "object"
+    },
+    "ThemeMode": {
+      "enum": [
+        "auto",
+        "light",
+        "dark"
+      ],
+      "title": "ThemeMode",
+      "type": "string"
+    },
+    "TileItem": {
+      "additionalProperties": false,
+      "description": "Tuile d'appareil.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "entityId": {
+          "pattern": "^[a-z_]+\\.[a-z0-9_]+$",
+          "title": "Entityid",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "icon": {
+          "default": "devices_other",
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Icon",
+          "type": "string"
+        },
+        "accent": {
+          "anyOf": [
+            {
+              "pattern": "^#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accent"
+        },
+        "size": {
+          "$ref": "#/$defs/TileSize",
+          "default": "small"
+        },
+        "display": {
+          "$ref": "#/$defs/DisplayMode",
+          "default": "auto"
+        },
+        "hidden": {
+          "default": false,
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "tap": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Action"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "longPress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Action"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "entityId",
+        "name"
+      ],
+      "title": "TileItem",
+      "type": "object"
+    },
+    "TileSection": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "tiles",
+          "default": "tiles",
+          "title": "Kind",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/TileItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "TileSection",
+      "type": "object"
+    },
+    "TileSize": {
+      "enum": [
+        "small",
+        "wide",
+        "large"
+      ],
+      "title": "TileSize",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Document de mise en page complet, tel que renvoyé par ``GET /api/layout``.",
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "default": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "revision": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "publishedAt": {
+      "format": "date-time",
+      "title": "Publishedat",
+      "type": "string"
+    },
+    "theme": {
+      "$ref": "#/$defs/Theme"
+    },
+    "tabs": {
+      "items": {
+        "$ref": "#/$defs/Tab"
+      },
+      "title": "Tabs",
+      "type": "array"
+    },
+    "home": {
+      "$ref": "#/$defs/Home"
+    },
+    "rooms": {
+      "items": {
+        "$ref": "#/$defs/Room"
+      },
+      "title": "Rooms",
+      "type": "array"
+    }
+  },
+  "required": [
+    "publishedAt"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,33 @@
+name: HomeGlass Server
+version: "0.2.0"
+slug: homeglass_server
+description: Concevez et publiez le tableau de bord HomeGlass affiché par l'application Android HomeGlass.
+arch:
+  - amd64
+  - aarch64
+  - armv7
+init: false
+boot: auto
+startup: application
+homeassistant_api: true
+ingress: true
+ingress_port: 8099
+ingress_entry: /
+panel_icon: mdi:view-dashboard
+panel_title: HomeGlass
+panel_admin: false
+ports:
+  8765/tcp: 8765
+ports_description:
+  8765/tcp: API pour l'application Android HomeGlass
+map:
+  - addon_config:rw
+host_network: false
+options:
+  log_level: info
+  api_port: 8765
+  allow_remote_access: false
+schema:
+  log_level: list(trace|debug|info|notice|warning|error|fatal)
+  api_port: port?
+  allow_remote_access: bool
