@@ -3,6 +3,8 @@
 Add-on Home Assistant qui produit la mise en page du dashboard **HomeGlass** (application
 Android au style « Apple Maison »).
 
+* **Dépôt principal du projet :** [https://github.com/boubalouf/HomeGlass](https://github.com/boubalouf/HomeGlass)
+
 L'add-on est le seul endroit où la mise en page est éditée : pièces, sections, tuiles,
 scènes, thème, onglets et profils par appareil. Il expose ensuite cette mise en page en
 JSON à l'application Android, qui ne fait que l'afficher.
@@ -22,9 +24,9 @@ JSON à l'application Android, qui ne fait que l'afficher.
 ## Installation
 
 1. Dans Home Assistant : **Paramètres → Modules complémentaires → Boutique**.
+
 2. Menu **⋮ → Dépôts**, ajouter l'URL de ce dépôt :
-   `https://github.com/homeglass/homeglass-addons` (à remplacer par l'URL réelle de
-   publication avant de distribuer l'add-on).
+   `https://github.com/boubalouf/HomeGlass` (ou l'URL du dépôt d'add-ons dédié le cas échéant).
 3. Installer **HomeGlass Server**, démarrer, puis ouvrir le panneau **HomeGlass** dans la
    barre latérale.
 
@@ -61,38 +63,3 @@ HG_AUTH_WS_URL=ws://homeassistant.local:8123/api/websocket \
 HG_DATA_DIR=/tmp/homeglass-data \
 SUPERVISOR_TOKEN="<jeton d'accès longue durée>" \
   .venv/bin/python -m homeglass_server.serve
-```
-
-Sans `SUPERVISOR_TOKEN`, le serveur démarre quand même : la connexion à Home Assistant
-reste désactivée et `GET /internal/status` le signale. Le faux Home Assistant des tests
-(`tests/fake_ha.py`) sert de référence pour le protocole WebSocket.
-
-Construction de l'image (multi-arch, via les images de base Home Assistant) :
-
-```bash
-docker build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base:3.20 -t homeglass-server .
-```
-
-Le Supervisor utilise `build.yaml` pour choisir l'image de base selon l'architecture
-(`amd64`, `aarch64`, `armv7`).
-
-## Structure
-
-```text
-config.yaml            métadonnées de l'add-on (Ingress, options, ports)
-build.yaml             images de base par architecture
-Dockerfile, run.sh     image et point d'entrée (bashio)
-homeglass_server/      backend FastAPI + modèles Pydantic
-  app.py               assemblage : routes, middleware, cycle de vie
-  api/                 routes de l'application, routes de l'éditeur, hub WebSocket
-  ha/                  client WebSocket, cache des entités, génération, validation des jetons
-  models/layout.py     contrat de mise en page v1
-  models/schema_export.py  export du JSON Schema
-  store/               brouillon/publication/historique, appareils, ressources
-schema/layout.v1.json  schéma versionné, généré depuis les modèles
-web/                   interface web servie par l'add-on (page d'accueil à ce stade)
-tests/                 pytest (contrat, schéma, client Home Assistant simulé, API, stockage)
-```
-
-Le contrat de mise en page est décrit dans [DOCS.md](DOCS.md). Toute évolution cassante
-incrémente `schemaVersion` ; les ajouts de champs optionnels ne l'incrémentent pas.
